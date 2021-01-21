@@ -4,7 +4,8 @@ import numpy as np
 import copy
 
 def execute_global_registration(source_processed, target_processed, source_fpfh,
-                                target_fpfh, voxel_size = 10, ransac_dist_modifier=1.5, ransac_edge_length=0.9, verbose = False):
+                                target_fpfh, voxel_size = 10, ransac_dist_modifier=1.5, ransac_edge_length=0.9, mutual_filter = True,
+                                verbose = False):
     """ Implements the RANSAC registration based on feature matching and returns a registration.RegistrationResult object.
     
     Source: Adapted from open3d global registration documentation: http://www.open3d.org/docs/release/tutorial/pipelines/global_registration.html
@@ -39,13 +40,13 @@ def execute_global_registration(source_processed, target_processed, source_fpfh,
         print("   Since the  voxel size is %.3f," % voxel_size)
         print("   we use a liberal distance threshold %.3f." % distance_threshold)
         
-    result = o3d.registration.registration_ransac_based_on_feature_matching(
-        source_processed, target_processed, source_fpfh, target_fpfh, distance_threshold,
-        o3d.registration.TransformationEstimationPointToPoint(False), 4, [
-            o3d.registration.CorrespondenceCheckerBasedOnEdgeLength(ransac_edge_length),
-            o3d.registration.CorrespondenceCheckerBasedOnDistance(
+    result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
+        source_processed, target_processed, source_fpfh, target_fpfh, mutual_filter, distance_threshold,
+        o3d.pipelines.registration.TransformationEstimationPointToPoint(False), 4, [
+            o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(ransac_edge_length),
+            o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
                 distance_threshold)
-        ], o3d.registration.RANSACConvergenceCriteria(4000000, 500))
+        ], o3d.pipelines.registration.RANSACConvergenceCriteria(4000000, 500))
     
     return result
 
@@ -79,10 +80,10 @@ def icp_registration(source_processed, target_processed, source_fpfh, target_fpf
     
     distance_threshold = voxel_size * icp_dist_check
 
-    result = o3d.registration.registration_icp(
+    result = o3d.pipelines.registration.registration_icp(
         source_processed, target_processed, distance_threshold, ransac_transform,
-        o3d.registration.TransformationEstimationPointToPlane(),
-        o3d.registration.ICPConvergenceCriteria(max_iteration = 2000))
+        o3d.pipelines.registration.TransformationEstimationPointToPlane(),
+        o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration = 2000))
     
     return result
 
@@ -127,9 +128,10 @@ def colored_icp(source_pcd, target_pcd, ransac_transform, voxel_radius, coloredI
     target_colorreg.estimate_normals(
         o3d.geometry.KDTreeSearchParamHybrid(radius=voxel_radius * 2, max_nn=coloredICP_maxnn))
     
-    result_icp_colored = o3d.registration.registration_colored_icp(
+    result_icp_colored = o3d.pipelines.registration.registration_colored_icp(
         source_colorreg, target_colorreg, voxel_radius, current_transformation,
-        o3d.registration.ICPConvergenceCriteria(relative_fitness=1e-6,
+        o3d.pipelines.registration.TransformationEstimationForColoredICP(),
+        o3d.pipelines.registration.ICPConvergenceCriteria(relative_fitness=1e-6,
                                                 relative_rmse=1e-6,
                                                 max_iteration=100))
     

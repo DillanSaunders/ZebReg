@@ -40,7 +40,7 @@ def preprocess_point_cloud(pcd, voxel_size =10, downsampling= False, norm_radius
 
     radius_feature = voxel_size * fpfh_radius_modifier
     print(f":: Compute FPFH feature with search radius {radius_feature}.\n---------------------------------------")
-    pcd_fpfh = o3d.registration.compute_fpfh_feature(
+    pcd_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
         pcd_processed,
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=fpfh_maxnn))
     
