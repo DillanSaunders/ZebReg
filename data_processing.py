@@ -1,9 +1,58 @@
 import open3d as o3d
 import pandas as pd
 import numpy as np
+import glob
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as col
+
+def open_points_xls(files_path, cols=[0,1,2],row_skip=0, header=0):
+    """Opens excel files containing columns of XYZ coordinates of nuclei centers as Pandas DataFrames. These are stored in a list. 
+    Parameters
+    ----------
+    files_path: string
+        Location of the files to be loaded into python. Use '*' as the wildcard. The excel files should all be in the same format. 
+    cols: list
+        Number of columns of excel sheet to load into python. 
+    row_skip: int or None
+        Does not load these rows of the head of the excel sheet into python.
+    header: int or None
+        The column containing the header for the columns of the excel sheet.
+        
+    Returns
+    ---------
+    files_dataframe:
+        List of Pandas DataFrames the same length as the number of excel files. 
+    """
+    
+    files_list = list(np.sort(glob.glob(pts_path)))
+    files_dataframe = [pd.read_excel(file, skiprows = [row_skip], header = header, usecols = cols) for file in files_list]
+    
+    return files_dataframe, files_list
+
+def open_intensities_xls(files_path, cols=[0],row_skip=0, header=0):
+    """Opens excel files containing a single column of mean gene expression intensity at a given point as Pandas DataFrames. These are stored in a list. 
+    Parameters
+    ----------
+    files_path: string
+        Location of the files to be loaded into python. Use '*' as the wildcard. The excel files should all be in the same format. 
+    cols: list
+        Number of columns of excel sheet to load into python. 
+    row_skip: int or None
+        Does not load these rows of the head of the excel sheet into python.
+    header: int or None
+        The column containing the header for the columns of the excel sheet.
+        
+    Returns
+    ---------
+    files_dataframe:
+        List of Pandas DataFrames the same length as the number of excel files. 
+    """
+    
+    files_list = list(np.sort(glob.glob(pts_path)))
+    files_dataframe = [pd.read_excel(file, skiprows = [row_skip], header = header, usecols = cols) for file in files_list]
+    
+    return files_dataframe, files_list
 
 def excel_to_pcd(excel_list, names_list, return_filenames = False):
     """ Converts excel files containing xyz coordinates into geometry.PointCloud object. Returns the filenames as a list if return_filenames=True"""
