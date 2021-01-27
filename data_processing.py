@@ -199,6 +199,8 @@ def colour_map(intensity_array,cmap):
     rgb_array: np.array
         n x 3 array where n is the number of points in the point cloud
     lut: matplotlib.cm.ScalarMappable object 
+        To be used to create a Matplotlib scale bar
+
     """
     
     min_intensity=np.amin(intensity_array)
@@ -250,3 +252,83 @@ def assign_colors(source_pcd, target_pcd, color_list, cmap):
     print(":: Assigned colors to point clouds")
     
     return None
+
+def colour_region(total_points, region_points, cmap):
+    
+    """" Adds RGB colour to a point cloud, and creates the corresponding intensity array, using a subset of the point cloud to highlight that region
+    
+    Parameters:
+    -----------
+    total_points: geometry.PointCloud
+        Complete tailbud point cloud to be coloured
+    region_points: geometry.PointCloud
+        Subset of total_points which denotes a specifc region e.g. ablation, in the structure
+    cmap: string
+        Name of Matplotlib color map used to visualise the RGB colour
+        
+    Returns:
+    --------
+    rgb_array: np.array
+        n x 3 array where n is the number of points in the point cloud
+    lut: matplotlib.cm.ScalarMappable object 
+       To be used to create a Matplotlib scale bar
+    region_intensity: Numpy Array
+        Numpy array of length total_points with intensity values corresponding to each xyz point
+    """
+    
+    
+    total_points=total_points.to_numpy(dtype="float64")
+    region_points=region_points.to_numpy(dtype="float64")
+
+    region_intensity= np.zeros([len(total_points),1])
+
+    for index in range(len(region_points)):
+
+        corresponding_points=np.where(total_points[:,0]==region_points[index,0])
+        if len(list(corresponding_points)[0]) > 1:
+            print('there is more than 1 corresponding point')
+            
+            for j in range(len(list(corresponding_points)[0])):
+                position_index=list(corresponding_points)[0][j]
+                if total_points[position_index,1]== region_points[index,1]:
+                    region_intensity[position_index]=1.0
+
+        else:
+            region_intensity[list(corresponding_points)[0][0]]=1.0
+    
+    rgb_array, lut = colormap(region_intensity, cmap) 
+            
+    return rgb_array, lut, region_intensity
+
+def pcd_to_tiff(point_cloud, intensity_array, xdim_px, ydim_px, zdim_px, x_res, y_res, z_res, spot_diameter, image_name):
+    
+    """ Takes each point of a point cloud and creates spots of a given pixel intensity given by intensity array. This is then exported as a tiff file. 
+    Parameters:
+    -----------
+    
+    """
+    export_pcd=np.asarray(point_cloud.points)
+    export_image=np.zeros([zdim_px,xdim_px,ydim_px])
+    
+    export_x_location=np.round((export_pcd[:,0]-np.min(export_pcd[:,0]))*x_resolution).astype('int')
+    export_y_location=np.round((export_pcd[:,1]-np.min(export_pcd[:,1]))*y_resolution).astype('int')
+    export_z_location=np.round((export_pcd[:,2]-np.min(export_pcd[:,2]))*z_resolution).astype('int')
+    
+    pixel_radius=int(np.round(x_resolution*(spot_diameter/2)))
+    
+    for i in range(len(export_pcd)):
+        print(len(export_pcd)-i,'remaining')
+        center_point=export_x_location[i],export_y_location[i],export_z_location[i]
+        for x in range(center_point[0]-pixel_radius,center_point[0]+pixel_radius+1):
+            for y in range(center_point[1]-pixel_radius, center_point[1]+pixel_radius+1):
+                for z in range(center_point[2]-pixel_radius,center_point[2]+pixel_radius+1):
+                    length=np.sqrt((x-center_point[0])**2+(y-center_point[1])**2+(z-center_point[2])**2)
+                
+                if length<=int(np.round(pixel_radius)):
+                    export_image[z,x,y]=intensity_array[i]
+                    
+    tiff.imwrite(image_name,export_image.astype("uint8"), compression='jpeg')
+    print('Saved',image_name,'as Tiff')
+    
+    return None
+    
