@@ -305,16 +305,38 @@ def pcd_to_tiff(point_cloud, intensity_array, xdim_px, ydim_px, zdim_px, x_res, 
     """ Takes each point of a point cloud and creates spots of a given pixel intensity given by intensity array. This is then exported as a tiff file. 
     Parameters:
     -----------
-    
+    point_cloud: open3d.geometry.PointCloud()
+        The point_cloud to be exported as tiff file
+    intensity_array: numpy.array()
+    xdim_px: integer
+        X-dimension of the output image in pixels
+    ydim_px: integer
+        Y-dimension of the output image in pixels
+    zdim_px: integer
+        Z-dimension of the output image in pixels
+    x_res: float
+        Number of microns per pixel in the X-dimension of the image
+    y_res: float
+        Number of microns per pixel in the Y-dimension of the image
+    z_res: float
+        Number of microns per pixel in the Z-dimension of the image
+    spot_diameter: float
+        Diameter in microns of spots representing each xyz-point in image
+    image_name: string
+        Name of output image
+        
+    Returns:
+    --------
+    None
     """
     export_pcd=np.asarray(point_cloud.points)
     export_image=np.zeros([zdim_px,xdim_px,ydim_px])
     
-    export_x_location=np.round((export_pcd[:,0]-np.min(export_pcd[:,0]))*x_resolution).astype('int')
-    export_y_location=np.round((export_pcd[:,1]-np.min(export_pcd[:,1]))*y_resolution).astype('int')
-    export_z_location=np.round((export_pcd[:,2]-np.min(export_pcd[:,2]))*z_resolution).astype('int')
+    export_x_location=np.round((export_pcd[:,0]-np.min(export_pcd[:,0]))*x_res).astype('int')
+    export_y_location=np.round((export_pcd[:,1]-np.min(export_pcd[:,1]))*y_res).astype('int')
+    export_z_location=np.round((export_pcd[:,2]-np.min(export_pcd[:,2]))*z_res).astype('int')
     
-    pixel_radius=int(np.round(x_resolution*(spot_diameter/2)))
+    pixel_radius=int(np.round(x_res*(spot_diameter/2)))
     
     for i in range(len(export_pcd)):
         print(len(export_pcd)-i,'remaining')
