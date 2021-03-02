@@ -1,0 +1,16 @@
+﻿"Table: Comparison of the genetic algorithm optimised objectives across TCF, tbxta and sox2",,,,,,,,,,,Previous,,,,,Using pos 3 as target,,
+,Best Objectives*,,,,,,,,,,,,,,,,,
+Gene for colored ICP,Fitness,Inlier RMSE,Inlier MAE,,,,,,,TCF,Fitness,Inlier RMSE,Inlier MAE,,TCF,Fitness,Inlier RMSE,Inlier MAE
+TCF,1,5.378990175,15.53933056,,,,,,,1st run,1,5.358855365,15.90130697,,1st run,1,4.150438398,9.369309305
+Tbxta,1,5.343927961,10.45933942,,,,,,,2nd run,1,5.378990175,15.53933056,,2nd run,1,4.160048208,9.565343411
+Sox2,1,5.316416016,9.197300902,,,,,,,3rd run,1,5.292365744,15.74341167,,3rd run,1,4.153422909,9.277853895
+,,,,,,,,,,,,,,,,,,
+"*For each gene, 3 runs of NSGA-III were carried out, with a maximum of 50 generations per run.",,,,,,,,,,Tbxta,,,,,Tbxta,,,
+ The best objective amongst all 3 runs are documented here for comparison.,,,,,,,,,,1st run,1,5.345867874,10.49326522,,1st run,1,5.343729766,10.40102505
+,,,,,,,,,,2nd run,1,5.343927961,10.45933942,,2nd run,1,5.344289068,10.56663104
+,,,,,,,,,,3rd run,1,5.344289068,10.56663104,,3rd run,1,5.357087312,10.22505996
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,Sox2,,,,,Sox2,,,
+,,,,,,,,,,1st run,1,5.352724591,9.182954038,,1st run,1,5.36602806,8.94828355
+,,,,,,,,,,2nd run,1,5.345677027,9.265438403,,2nd run,1,5.363357278,8.925447736
+,,,,,,,,,,3rd run,1,5.316416016,9.197300902,,3rd run,1,5.317451084,8.981155012

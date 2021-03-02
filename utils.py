@@ -1,6 +1,11 @@
 import numpy as np
 import matplotlib.cm as cm
 import matplotlib.colors as col
+from scipy.interpolate import interp1d
+from skimage.morphology import dilation
+from scipy.interpolate import interp1d
+import tifffile.tifffile as tiff
+import matplotlib.pyplot as plt
 
 def colour_map(intensity_array,cmap):
     """ Converts the scalar intensity values into RGB values for visualisation. 
@@ -95,3 +100,56 @@ def mae_permutation(num_permute, color_array):
         mae_val_rounded = round(float(mae_val),3) 
         mae_list.append(mae_val_rounded)
     return mae_list
+
+
+def pcd_to_tif(pcd,intensity_array, width, height, depth, filename = "test.tif", dtype = "int", selem_color = np.ones((3,6,6)), selem_DAPI = np.ones((3,6,6)), return_DAPI = True, verbose = True):
+    pcd_points = np.asarray(pcd.points)
+    x_lim = [np.min(pcd_points[:,0]), np.max(pcd_points[:,0]) ]
+    y_lim = [np.min(pcd_points[:,1]), np.max(pcd_points[:,1]) ]
+    z_lim = [np.min(pcd_points[:,2]), np.max(pcd_points[:,2])]
+
+    x_interp = interp1d(x_lim, [0,width-1])
+    y_interp = interp1d(y_lim, [0,height-1])
+    z_interp = interp1d(z_lim, [0,depth-1])
+
+    data_x_interp = np.round(x_interp(pcd_points[:,0]))
+    data_y_interp = np.round(y_interp(pcd_points[:,1]))
+    data_z_interp = np.round(z_interp(pcd_points[:,2]))
+    
+    combined_zyxc = np.vstack([data_z_interp.squeeze(), data_x_interp.squeeze(), data_y_interp.squeeze(), intensity_array.squeeze()]).astype(dtype)
+    export_image=np.zeros([depth, width, height])
+    dapi_image = np.zeros([depth, width, height])
+    
+    if return_DAPI:
+        for i in range(combined_zyxc.shape[1]):
+            export_image[combined_zyxc[0][i], combined_zyxc[1][i], combined_zyxc[2][i]] = combined_zyxc[3][i]
+            dapi_image[combined_zyxc[0][i], combined_zyxc[1][i], combined_zyxc[2][i]] = np.max(combined_zyxc[3])
+        dilated = dilation(export_image, selem = selem_color)
+        dilated_dapi = dilation(dapi_image, selem = selem_DAPI)
+        
+        tiff.imwrite(filename, dilated.astype("uint8"), compression='jpeg')
+        if verbose:
+            print(f"Saving color channel as {filename}")
+            print("Saving DAPI channel as {}".format("DAPI_"+filename))
+        tiff.imwrite(("DAPI_"+filename), dilated_dapi.astype("uint8"), compression='jpeg')
+                        
+
+    else:        
+        for i in range(combined_zyxc.shape[1]):
+            export_image[combined_zyxc[0][i], combined_zyxc[1][i], combined_zyxc[2][i]] = combined_zyxc[3][i]
+            dilated = dilation(export_image, selem = selem_color)
+        tiff.imwrite(filename, dilated.astype("uint8"), compression='jpeg')
+    
+    return None
+
+def visualise_pcd(pcd, figsize = (10,10), color = 'k', s = 50):
+    fig = plt.figure(figsize = figsize)
+    ax = fig.add_subplot(111, projection='3d')
+    
+    pcd_points = np.asarray(pcd.points)
+    try:
+        pcd_color = np.asarray(pcd.colors)
+        ax.scatter(xs = pcd_points[:,0], ys = pcd_points[:,1], zs = pcd_points[:,2], color= pcd_color, s = s)
+    except:
+        ax.scatter(xs = pcd_points[:,0], ys = pcd_points[:,1], zs = pcd_points[:,2], color= color, s = s)
+        
