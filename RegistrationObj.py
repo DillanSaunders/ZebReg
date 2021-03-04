@@ -14,7 +14,7 @@ import tifffile.tifffile as tiff
 class RegistrationObj():
     
     def __init__(self, pos_path_source, pos_path_target, color_path_source, color_path_target, 
-                 algorithm = "colored_icp", **kwargs):
+                 algorithm, **kwargs):
         self.pos_path_source= pos_path_source
         self.source_pcd = o3d.geometry.PointCloud()
         self.pos_path_target= pos_path_target
@@ -25,7 +25,8 @@ class RegistrationObj():
         self.color_path_target= color_path_target
         self.target_color = None
         self.norm_target_color = None
-        self.algorithm = algorithm 
+        self.algorithm = algorithm
+        assert (self.algorithm=='colored_icp'or self.algorithm=='icp' or self.algorithm=='ransac'), 'Invalid algorithm specified. Choose from: \n ransac -> runs only RANSAC global registration \n icp -> runs RANSAC and then local ICP registration \n colored_icp -> runs RANSAC and then local colored ICP registration'
         self.preprocessing = False
         self.result = None
         self.registration_result = o3d.pipelines.registration.RegistrationResult()
@@ -36,6 +37,7 @@ class RegistrationObj():
         self.method = "Median"
         self.other_registered_channels = []
         self.manual_corr_map = None #To insert corr map obtained from GA. Will override corr_map from registration result
+        
         
         """Setting the arguments for create_pcd"""
         self.pos_skiprows = None
@@ -139,10 +141,16 @@ class RegistrationObj():
             
             source_pcd = o3d.geometry.PointCloud() 
             source_np = np.asarray(source_df)
+            assert (len(source_np.shape)==2 and source_np.shape[1]==3), 'Source points file has incorrect dimensions. \n Source points file must be a 2-dimensional array with "n" rows and 3 columns'
+            assert (source_np.dtype=='float64'), 'Source points contain non-float values. \n This could mean column headings have been read incorrectly from file. Try altering pos_skiprows, pos_header, pos_usecols attributes.'
+            
             source_color = np.asarray(source_color_df)
-            norm_colors_source = min_max_normalisation(source_color)
+            assert (len(source_color.shape)==2 and source_color.shape[1]==1), 'Source colors file has incorrect dimensions. \n Source colors file must be a 2-dimensional array with "n" rows and 1 column'
+            assert (source_color.dtype=='float64'), 'Source colors contain non-float values. \n This could mean column headings have been read incorrectly from file. Try altering color_skiprows, color_header, color_usecols attributes.'
             self.update_source_color(source_color)
+            norm_colors_source = min_max_normalisation(source_color)
             self.update_norm_source_color(norm_colors_source)
+            
             source_rgb, _ = colour_map(source_color,"viridis")
             source_pcd.points=o3d.utility.Vector3dVector(source_np)
             source_pcd.colors=o3d.utility.Vector3dVector(source_rgb)
@@ -152,10 +160,16 @@ class RegistrationObj():
             
             target_pcd = o3d.geometry.PointCloud() 
             target_np = np.asarray(target_df)
+            assert (len(target_np.shape)==2 and target_np.shape[1]==3), 'Target points file has incorrect dimensions. \n Target points file must be a 2-dimensional array with "n" rows and 3 columns'
+            assert (target_np.dtype=='float64'), 'Target points contain non-float values. \n This could mean column headings have been read incorrectly from file. Try altering pos_skiprows, pos_header attributes.'
+            
             target_color = np.asarray(target_color_df)
+            assert (len(target_color.shape)==2 and target_color.shape[1]==1), 'Target colors file has incorrect dimensions. \n Target colors file must be a 2-dimensional array with "n" rows and 1 column'
+            assert (target_color.dtype=='float64'), 'Target colors contain non-float values. \n This could mean column headings have been read incorrectly from file. Try altering color_skiprows, color_header, color_usecols attributes.'
             norm_colors_target = min_max_normalisation(target_color)
             self.update_target_color(target_color)
             self.update_norm_target_color(norm_colors_target)
+            
             target_rgb, _ = colour_map(target_color,"viridis")
             target_pcd.points=o3d.utility.Vector3dVector(target_np)
             target_pcd.colors=o3d.utility.Vector3dVector(target_rgb)
@@ -176,10 +190,16 @@ class RegistrationObj():
 
                 source_pcd = o3d.geometry.PointCloud() 
                 source_np = np.asarray(source_df)
+                assert (len(source_np.shape)==2 and source_np.shape[1]==3), 'Source points file has incorrect dimensions. \n Source points file must be a 2-dimensional array with "n" rows and 3 columns'
+                assert (source_np.dtype=='float64'), 'Source points contain non-float values. \n This could mean column headings have been read incorrectly from file. Try altering pos_skiprows, pos_header, pos_usecols attributes.'
+            
                 source_color = np.asarray(source_color_df)
+                assert (len(source_color.shape)==2 and source_color.shape[1]==1), 'Source colors file has incorrect dimensions. \n Source colors file must be a 2-dimensional array with "n" rows and 1 column'
+                assert (source_color.dtype=='float64'), 'Source colors contain non-float values. \n This could mean column headings have been read incorrectly from file. Try altering color_skiprows, color_header, color_usecols attributes.'
                 norm_colors_source = min_max_normalisation(source_color)
                 self.update_source_color(source_color)
                 self.update_norm_source_color(norm_colors_source)
+                
                 source_rgb, _ = colour_map(source_color,"viridis")
                 source_pcd.points=o3d.utility.Vector3dVector(source_np)
                 source_pcd.colors=o3d.utility.Vector3dVector(source_rgb)
@@ -189,10 +209,16 @@ class RegistrationObj():
 
                 target_pcd = o3d.geometry.PointCloud() 
                 target_np = np.asarray(target_df)
+                assert (len(target_np.shape)==2 and target_np.shape[1]==3), 'Target points file has incorrect dimensions. \n Target points file must be a 2-dimensional array with "n" rows and 3 columns'
+                assert (target_np.dtype=='float64'), 'Target points contain non-float values. \n This could mean column headings have been read incorrectly from file. Try altering pos_skiprows, pos_header attributes.'
+            
                 target_color = np.asarray(target_color_df)
+                assert (len(target_color.shape)==2 and target_color.shape[1]==1), 'Target colors file has incorrect dimensions. \n Target colors file must be a 2-dimensional array with "n" rows and 1 column'
+                assert (target_color.dtype=='float64'), 'Target colors contain non-float values. \n This could mean column headings have been read incorrectly from file. Try altering color_skiprows, color_header, color_usecols attributes.'
                 norm_colors_target = min_max_normalisation(target_color)
                 self.update_target_color(target_color)
                 self.update_norm_target_color(norm_colors_target)
+                
                 target_rgb, _ = colour_map(target_color,"viridis")
                 target_pcd.points=o3d.utility.Vector3dVector(target_np)
                 target_pcd.colors=o3d.utility.Vector3dVector(target_rgb)
