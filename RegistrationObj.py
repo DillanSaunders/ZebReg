@@ -186,7 +186,6 @@ class RegistrationObj():
                 source_df = pd.read_csv(self.pos_path_source, skiprows = self.pos_skiprows, usecols = self.pos_usecols, header = self.pos_header)
                 target_df = pd.read_csv(self.pos_path_target, skiprows = self.pos_skiprows, usecols = self.pos_usecols, header = self.pos_header)
                 source_color_df = pd.read_csv(self.color_path_source, skiprows = self.color_skiprows, usecols = self.color_usecols, header = self.color_header)
-                print(source_color_df.dtypes)
                 target_color_df = pd.read_csv(self.color_path_target, skiprows = self.color_skiprows, usecols = self.color_usecols, header = self.color_header)
 
                 source_pcd = o3d.geometry.PointCloud() 
@@ -212,11 +211,11 @@ class RegistrationObj():
                 target_pcd = o3d.geometry.PointCloud() 
                 target_np = np.asarray(target_df)
                 assert (len(target_np.shape)==2 and target_np.shape[1]==3), 'Target points file has incorrect dimensions. \n Target points file must be a 2-dimensional array with "n" rows and 3 columns'
-                assert (target_np.dtype=='float64'), 'Target points contain non-float values. \n This could mean column headings have been read incorrectly from file. Try altering pos_skiprows, pos_header attributes.'
+                assert (target_np.dtype=='float64' or target_np.dtype == "int64"), 'Target points contain non-float or int values. \n This could mean column headings have been read incorrectly from file. Try altering pos_skiprows, pos_header attributes.'
             
                 target_color = np.asarray(target_color_df)
                 assert (len(target_color.shape)==2 and target_color.shape[1]==1), 'Target colors file has incorrect dimensions. \n Target colors file must be a 2-dimensional array with "n" rows and 1 column'
-                assert (target_color.dtype=='float64'), 'Target colors contain non-float values. \n This could mean column headings have been read incorrectly from file. Try altering color_skiprows, color_header, color_usecols attributes.'
+                assert (target_color.dtype=='float64' or target_np.dtype == "int64"), 'Target colors contain non-float or int values. \n This could mean column headings have been read incorrectly from file. Try altering color_skiprows, color_header, color_usecols attributes.'
                 norm_colors_target = min_max_normalisation(target_color)
                 self.update_target_color(target_color)
                 self.update_norm_target_color(norm_colors_target)
