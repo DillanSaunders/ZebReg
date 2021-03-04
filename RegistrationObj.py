@@ -609,7 +609,6 @@ class RegistrationObj():
         ### Dealing with the color channel used for registration 
                         
         if self.mode == "knn":
-            print("Entering knn for sox2")
             source_transformed = self.transform_source()
             X = np.asarray(source_transformed.points)
             y = self.source_color
