@@ -1,0 +1,131 @@
+---
+title: "Zebreg- Comparing distributions"
+output: html_document
+---
+
+```{r libraries, echo=FALSE}
+
+library(tidyverse)
+library(ggpubr)
+library(showtext)
+showtext_auto()
+#library(broom)
+#library(nortest)
+font_add("Trebuchet MS", "trebuc.ttf")
+library(RColorBrewer)
+```
+
+```{r importing combined csv}
+imputed_18ss <- read.csv("./datasets/merged_csv/18ss_combined.csv")
+head(imputed_18ss$Tagln3b)
+
+stt_posterior <- read.csv("./datasets/merged_csv/stt_posterior.csv")
+colnames(stt_posterior)[1] <- "sample_no"
+
+sthc_posterior <- read.csv("./datasets/merged_csv/sthc_posterior.csv")
+colnames(sthc_posterior)[1] <- "sample_no"
+
+stsc_posterior <- read.csv("./datasets/merged_csv/stsc_posterior.csv")
+colnames(stsc_posterior)[1] <- "sample_no"
+
+sttc_posterior <- read.csv("./datasets/merged_csv/sttc_posterior.csv")
+colnames(sttc_posterior)[1] <- "sample_no"
+
+stti_posterior <- read.csv("./datasets/merged_csv/stti_posterior.csv")
+colnames(stti_posterior)[1] <- "sample_no"
+
+stwd_posterior <- read.csv("./datasets/merged_csv/stwd_posterior.csv")
+colnames(stwd_posterior)[1] <- "sample_no"
+
+stzc_posterior <- read.csv("./datasets/merged_csv/stzc_posterior.csv")
+colnames(stzc_posterior)[1] <- "sample_no"
+
+```
+
+```{r extracting gene intensities}
+
+sox2_18ss <- stt_posterior %>% 
+  filter(sample_no == 2) %>%
+  select("sox2")
+  
+tbxta_18ss <- stt_posterior %>% 
+  filter(sample_no == 2) %>%
+  select("tbxta")
+  
+
+tcf_18ss <- stt_posterior %>% 
+  filter(sample_no == 2) %>%
+  select("TCF_mRNA_levels")
+
+hes6_18ss <- sthc_posterior %>%
+  filter(sample_no == 1) %>%
+  select("hes6")
+
+cdh6_18ss <- sthc_posterior %>%
+  filter(sample_no == 1) %>%
+  select("cdh6")
+  
+sp5l_18ss <- stsc_posterior %>%
+  filter(sample_no == 2) %>%
+  select("sp5l")
+  
+tagln3b_18ss <- sttc_posterior %>%
+  filter(sample_no == 3) %>%
+  select("tagln3b")
+
+znf703_18ss <- stzc_posterior %>%
+  filter(sample_no == 3) %>%
+  select("znf703")
+
+wnt8a_18ss <- stwd_posterior %>%
+  filter(sample_no == 1) %>%
+  select("wnt8a")
+
+depdc7a_18ss <- stwd_posterior%>%
+  filter(sample_no == 1) %>%
+  select("depdc7a")
+
+thbs2_18ss <- stti_posterior %>%
+  filter(sample_no == 1) %>%
+  select("thbs2")
+
+id3_18ss <-stti_posterior %>%
+  filter(sample_no == 1)
+  select("id3")
+
+
+```
+
+```{r qqplot}
+colors <- brewer.pal(n = 12, name = "Set3")
+
+gg_qq_empirical <- function(original , imputed , gene, color, quantiles = seq(0,1,0.01)){
+   ggplot(mapping = aes(x = quantile((original), quantiles), 
+                       y = quantile((imputed), quantiles))) + 
+    geom_point(color = color) +
+    geom_abline(aes(slope = 1, intercept = 0), linetype = 2) +
+    labs(x = paste(gene, "(Original)"),
+         y= paste(gene, "(Imputed)"))
+}
+
+
+qq <- gg_qq_empirical((tbxta_18ss)$tbxta, as.numeric((imputed_18ss)$Tbxta), "tbxta", "brown3")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+
+qq <- gg_qq_empirical((tcf_18ss)$TCF_mRNA_levels, as.numeric((imputed_18ss)$TCF), "TCF", "brown1")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+
+
+
+quantile(imputed_18ss$Tbxta, quantile_val )
+quantile(tbxta_18ss$tbxta, quantile_val )
+
+```
+
+```{r}
+ggplot( data = imputed_18ss, aes(x = Tbxta )) + 
+  geom_histogram(bins = 50, color = "black") 
+
+```
+
+
