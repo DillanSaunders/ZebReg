@@ -74,7 +74,7 @@ tagln3b_18ss <- sttc_posterior %>%
   select("tagln3b")
 
 znf703_18ss <- stzc_posterior %>%
-  filter(sample_no == 3) %>%
+  filter(sample_no == 4) %>%
   select("znf703")
 
 wnt8a_18ss <- stwd_posterior %>%
@@ -90,13 +90,13 @@ thbs2_18ss <- stti_posterior %>%
   select("thbs2")
 
 id3_18ss <-stti_posterior %>%
-  filter(sample_no == 1)
+  filter(sample_no == 1) %>%
   select("id3")
 
 
 ```
 
-```{r qqplot}
+```{r plot function}
 colors <- brewer.pal(n = 12, name = "Set3")
 
 gg_qq_empirical <- function(original , imputed , gene, color, quantiles = seq(0,1,0.01)){
@@ -108,23 +108,58 @@ gg_qq_empirical <- function(original , imputed , gene, color, quantiles = seq(0,
          y= paste(gene, "(Imputed)"))
 }
 
+```
+
+```{r qqplot}
 
 qq <- gg_qq_empirical((tbxta_18ss)$tbxta, as.numeric((imputed_18ss)$Tbxta), "tbxta", "brown3")
 qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
 
-qq <- gg_qq_empirical((tcf_18ss)$TCF_mRNA_levels, as.numeric((imputed_18ss)$TCF), "TCF", "brown1")
+qq <- gg_qq_empirical((sox2_18ss)$sox2, as.numeric((imputed_18ss)$Sox2), "sox2", "chartreuse3")
 qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
 
+qq <- gg_qq_empirical((tcf_18ss)$TCF_mRNA_levels, as.numeric((imputed_18ss)$TCF), "TCF", "cyan1")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
 
+qq <- gg_qq_empirical((hes6_18ss)$hes6, as.numeric((imputed_18ss)$Hes6), "hes6", "brown1")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
 
-quantile(imputed_18ss$Tbxta, quantile_val )
-quantile(tbxta_18ss$tbxta, quantile_val )
+qq <- gg_qq_empirical((cdh6_18ss)$cdh6, as.numeric((imputed_18ss)$Cdh6), "cdh6", "darkolivegreen3")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+
+qq <- gg_qq_empirical((wnt8a_18ss)$wnt8a, as.numeric((imputed_18ss)$Wnt8a), "wnt8a", "darkslategray3")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+
+qq <- gg_qq_empirical((sp5l_18ss)$sp5l, as.numeric((imputed_18ss)$Sp5l), "sp5l", "darkorange1")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+
+qq <- gg_qq_empirical((znf703_18ss)$znf703, as.numeric((imputed_18ss)$Znf703), "znf703", "deeppink1")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+
+qq <- gg_qq_empirical((depdc7a_18ss)$depdc7a, as.numeric((imputed_18ss)$Depdc7a), "depdc7a", "blueviolet")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+
+qq <- gg_qq_empirical((tagln3b_18ss)$tagln3b, as.numeric((imputed_18ss)$Tagln3b), "tagln3b", "coral")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+
+qq <- gg_qq_empirical((id3_18ss)$id3, as.numeric((imputed_18ss)$Id3), "id3", "deepskyblue3")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+
+qq <- gg_qq_empirical((thbs2_18ss)$thbs2, as.numeric((imputed_18ss)$Thbs2), "thbs2", "deepskyblue")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+
+sum((imputed_18ss)$Thbs2 > 7.5)
+
+quantile(imputed_18ss$Thbs2, quantile_val )
+quantile(thbs2_18ss$thbs2, quantile_val )
+
+(thbs2_18ss)$thbs2
 
 ```
 
 ```{r}
-ggplot( data = imputed_18ss, aes(x = Tbxta )) + 
-  geom_histogram(bins = 50, color = "black") 
+qq <- gg_qq_empirical((sox2_18ss)$sox2, as.numeric((imputed_18ss)$Sox2), "sox2", "chartreuse3")
+qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
 
 ```
 
