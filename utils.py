@@ -142,14 +142,27 @@ def pcd_to_tif(pcd,intensity_array, width, height, depth, filename = "test.tif",
     
     return None
 
-def visualise_pcd(pcd, figsize = (10,10), color = 'k', s = 50):
+def visualise_pcd(pcd1, figsize = (10,10), color1 = 'k', s = 50, pcd2=None, color2='r'):
     fig = plt.figure(figsize = figsize)
     ax = fig.add_subplot(111, projection='3d')
     
-    pcd_points = np.asarray(pcd.points)
-    try:
-        pcd_color = np.asarray(pcd.colors)
-        ax.scatter(xs = pcd_points[:,0], ys = pcd_points[:,1], zs = pcd_points[:,2], color= pcd_color, s = s)
-    except:
-        ax.scatter(xs = pcd_points[:,0], ys = pcd_points[:,1], zs = pcd_points[:,2], color= color, s = s)
+    if pcd2==None:
+        pcd_points = np.asarray(pcd1.points)
+        try:
+            pcd_color = np.asarray(pcd1.colors)
+            ax.scatter(xs = pcd_points[:,0], ys = pcd_points[:,1], zs = pcd_points[:,2], color= pcd_color, s = s)
+        except:
+            ax.scatter(xs = pcd_points[:,0], ys = pcd_points[:,1], zs = pcd_points[:,2], color= color1, s = s)
+            
+    else:
+        pcd1_points=np.asarray(pcd1.points)
+        pcd2_points=np.asarray(pcd2.points)
         
+        try:
+            pcd1_color=np.asarray(pcd1.colors)
+            pcd2_color=np.asarray(pcd2.colors)
+            ax.scatter(xs = pcd1_points[:,0], ys = pcd1_points[:,1], zs = pcd1_points[:,2], color= pcd1_color, s = s)
+            ax.scatter(xs = pcd2_points[:,0], ys = pcd2_points[:,1], zs = pcd2_points[:,2], color= pcd2_color, s = s)
+        except:
+            ax.scatter(xs = pcd1_points[:,0], ys = pcd1_points[:,1], zs = pcd1_points[:,2], color= color1, s = s)
+            ax.scatter(xs = pcd2_points[:,0], ys = pcd2_points[:,1], zs = pcd2_points[:,2], color= color2, s = s)
