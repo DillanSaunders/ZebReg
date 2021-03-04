@@ -13,11 +13,27 @@ showtext_auto()
 #library(nortest)
 font_add("Trebuchet MS", "trebuc.ttf")
 library(RColorBrewer)
+library(ggpubr)
+
+```
+
+```{r plot function}
+colors <- brewer.pal(n = 12, name = "Set3")
+
+gg_qq_empirical <- function(original , imputed , gene, color, quantiles = seq(0,1,0.01)){
+   ggplot(mapping = aes(x = quantile((original), quantiles), 
+                       y = quantile((imputed), quantiles))) + 
+    geom_point(color = color) +
+    geom_abline(aes(slope = 1, intercept = 0), linetype = 2) +
+    labs(x = paste(gene, "(Original)"),
+         y= paste(gene, "(Imputed)"))
+}
+base_family = "Trebuchet MS"
+base_size = 40
 ```
 
 ```{r importing combined csv}
 imputed_18ss <- read.csv("./datasets/merged_csv/18ss_combined.csv")
-head(imputed_18ss$Tagln3b)
 
 stt_posterior <- read.csv("./datasets/merged_csv/stt_posterior.csv")
 colnames(stt_posterior)[1] <- "sample_no"
@@ -43,124 +59,239 @@ colnames(stzc_posterior)[1] <- "sample_no"
 ```
 
 ```{r extracting gene intensities}
-
+### Sox2
 sox2_18ss <- stt_posterior %>% 
   filter(sample_no == 2) %>%
-  select("sox2")
-  
+  select("sox2")%>%
+  filter(!(sox2 < median(sox2) - 3*mad(sox2) | sox2 > median(sox2) + 3*mad(sox2))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+imputed_18ss_sox2 <- imputed_18ss %>%
+  select("Sox2")%>%
+  filter(!(Sox2 < median(Sox2) - 3*mad(Sox2) | Sox2 > median(Sox2) + 3*mad(Sox2)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+# tbxta
 tbxta_18ss <- stt_posterior %>% 
   filter(sample_no == 2) %>%
-  select("tbxta")
-  
+  select("tbxta") %>%
+  filter(!(tbxta < median(tbxta) - 3*mad(tbxta) | tbxta > median(tbxta) + 3*mad(tbxta))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+imputed_18ss_tbxta <- imputed_18ss %>%
+  select("Tbxta")%>%
+  filter(!(Tbxta < median(Tbxta) - 3*mad(Tbxta) | Tbxta > median(Tbxta) + 3*mad(Tbxta)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
 
 tcf_18ss <- stt_posterior %>% 
   filter(sample_no == 2) %>%
-  select("TCF_mRNA_levels")
+  select("TCF_mRNA_levels")%>%
+  filter(!(TCF_mRNA_levels < median(TCF_mRNA_levels) - 3*mad(TCF_mRNA_levels) | TCF_mRNA_levels > median(TCF_mRNA_levels) + 3*mad(TCF_mRNA_levels))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+imputed_18ss_tcf <- imputed_18ss %>%
+  select("TCF")%>%
+  filter(!(TCF < median(TCF) - 3*mad(TCF) | TCF > median(TCF) + 3*mad(TCF)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
 
 hes6_18ss <- sthc_posterior %>%
   filter(sample_no == 1) %>%
-  select("hes6")
+  select("hes6")%>%
+  filter(!(hes6 < median(hes6) - 3*mad(hes6) | hes6 > median(hes6) +3*mad(hes6))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
 
-cdh6_18ss <- sthc_posterior %>%
-  filter(sample_no == 1) %>%
-  select("cdh6")
+imputed_18ss_hes6 <- imputed_18ss %>%
+  select("Hes6")%>%
+  filter(!(Hes6 < median(Hes6) - 3*mad(Hes6) | Hes6 > median(Hes6) + 3*mad(Hes6)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+cdh6_18ss <- stzc_posterior %>%
+  filter(sample_no == 4) %>%
+  select("cdh6")%>%
+  filter(!(cdh6 < median(cdh6) - 3*mad(cdh6) | cdh6 > median(cdh6) + 3*mad(cdh6))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+imputed_18ss_cdh6<- imputed_18ss %>%
+  select("Cdh6")%>%
+  filter(!(Cdh6 < median(Cdh6) - 3*mad(Cdh6) | Cdh6 > median(Cdh6) + 3*mad(Cdh6)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
   
 sp5l_18ss <- stsc_posterior %>%
-  filter(sample_no == 2) %>%
-  select("sp5l")
+  filter(sample_no == 5) %>%
+  select("sp5l")%>%
+  filter(!(sp5l < median(sp5l) - 3*mad(sp5l) | sp5l > median(sp5l) + 3*mad(sp5l))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+imputed_18ss_sp5l<- imputed_18ss %>%
+  select("Sp5l")%>%
+  filter(!(Sp5l < median(Sp5l) - 3*mad(Sp5l) | Sp5l > median(Sp5l) + 3*mad(Sp5l)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
   
 tagln3b_18ss <- sttc_posterior %>%
   filter(sample_no == 3) %>%
-  select("tagln3b")
+  select("tagln3b")%>%
+  filter(!(tagln3b < median(tagln3b) - 3*mad(tagln3b) | tagln3b > median(tagln3b) + 3*mad(tagln3b))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+imputed_18ss_tagln3b<- imputed_18ss %>%
+  select("Tagln3b")%>%
+  filter(!(Tagln3b < median(Tagln3b) - 3*mad(Tagln3b) | Tagln3b > median(Tagln3b) + 3*mad(Tagln3b)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
 
 znf703_18ss <- stzc_posterior %>%
   filter(sample_no == 4) %>%
-  select("znf703")
+  select("znf703")%>%
+  filter(!(znf703 < median(znf703) - 3*mad(znf703) | znf703 > median(znf703) + 3*mad(znf703))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+imputed_18ss_znf703<- imputed_18ss %>%
+  select("Znf703")%>%
+  filter(!(Znf703 < median(Znf703) - 3*mad(Znf703) | Znf703 > median(Znf703) + 3*mad(Znf703)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
 
 wnt8a_18ss <- stwd_posterior %>%
   filter(sample_no == 1) %>%
-  select("wnt8a")
+  select("wnt8a")%>%
+  filter(!(wnt8a < median(wnt8a) - 3*mad(wnt8a) | wnt8a > median(wnt8a) + 3*mad(wnt8a))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+imputed_18ss_wnt8a<- imputed_18ss %>%
+  select("Wnt8a")%>%
+  filter(!(Wnt8a < median(Wnt8a) - 3*mad(Wnt8a) | Wnt8a > median(Wnt8a) + 3*mad(Wnt8a)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
 
 depdc7a_18ss <- stwd_posterior%>%
   filter(sample_no == 1) %>%
-  select("depdc7a")
+  select("depdc7a")%>%
+  filter(!(depdc7a < median(depdc7a) - 3*mad(depdc7a) | depdc7a > median(depdc7a) + 3*mad(depdc7a))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+imputed_18ss_depdc7a<- imputed_18ss %>%
+  select("Depdc7a")%>%
+  filter(!(Depdc7a < median(Depdc7a) - 3*mad(Depdc7a) | Depdc7a > median(Depdc7a) + 3*mad(Depdc7a)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
 
 thbs2_18ss <- stti_posterior %>%
   filter(sample_no == 1) %>%
-  select("thbs2")
+  select("thbs2")%>%
+  filter(!(thbs2 < median(thbs2) - 3*mad(thbs2) | thbs2 > median(thbs2) + 3*mad(thbs2))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
+
+imputed_18ss_thbs2<- imputed_18ss %>%
+  select("Thbs2")%>%
+  filter(!(Thbs2 < median(Thbs2) - 3*mad(Thbs2) | Thbs2 > median(Thbs2) + 3*mad(Thbs2)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
 
 id3_18ss <-stti_posterior %>%
   filter(sample_no == 1) %>%
-  select("id3")
+  select("id3")%>%
+  filter(!(id3 < median(id3) - 3*mad(id3) | id3 > median(id3) + 3*mad(id3))) %>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
 
+imputed_18ss_id3<- imputed_18ss %>%
+  select("Id3")%>%
+  filter(!(Id3 < median(Id3) - 3*mad(Id3) | Id3 > median(Id3) + 3*mad(Id3)))%>%
+  lapply(as.numeric)%>%
+  unlist(use.names = FALSE)
 
-```
-
-```{r plot function}
-colors <- brewer.pal(n = 12, name = "Set3")
-
-gg_qq_empirical <- function(original , imputed , gene, color, quantiles = seq(0,1,0.01)){
-   ggplot(mapping = aes(x = quantile((original), quantiles), 
-                       y = quantile((imputed), quantiles))) + 
-    geom_point(color = color) +
-    geom_abline(aes(slope = 1, intercept = 0), linetype = 2) +
-    labs(x = paste(gene, "(Original)"),
-         y= paste(gene, "(Imputed)"))
-}
 
 ```
 
 ```{r qqplot}
 
-qq <- gg_qq_empirical((tbxta_18ss)$tbxta, as.numeric((imputed_18ss)$Tbxta), "tbxta", "brown3")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+qq_tbxta <- gg_qq_empirical((tbxta_18ss), imputed_18ss_tbxta, "tbxta", "brown3")
+qq_tbxta <- qq_tbxta + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
+qq_tbxta
+ggsave("./results/qqplots/qq_tbxta.png", qq_tbxta)
 
-qq <- gg_qq_empirical((sox2_18ss)$sox2, as.numeric((imputed_18ss)$Sox2), "sox2", "chartreuse3")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+qq_sox2 <- gg_qq_empirical((sox2_18ss), imputed_18ss_sox2, "sox2", "chartreuse3")
+qq_sox2 <- qq_sox2 + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
+qq_sox2
+ggsave("./results/qqplots/qq_sox2.png", qq_sox2)
 
-qq <- gg_qq_empirical((tcf_18ss)$TCF_mRNA_levels, as.numeric((imputed_18ss)$TCF), "TCF", "cyan1")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
 
-qq <- gg_qq_empirical((hes6_18ss)$hes6, as.numeric((imputed_18ss)$Hes6), "hes6", "brown1")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+qq_tcf <- gg_qq_empirical((tcf_18ss), imputed_18ss_tcf, "TCF", "cyan1")
+qq_tcf<- qq_tcf + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
+qq_tcf
+ggsave("./results/qqplots/qq_tcf.png", qq_tcf)
 
-qq <- gg_qq_empirical((cdh6_18ss)$cdh6, as.numeric((imputed_18ss)$Cdh6), "cdh6", "darkolivegreen3")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
 
-qq <- gg_qq_empirical((wnt8a_18ss)$wnt8a, as.numeric((imputed_18ss)$Wnt8a), "wnt8a", "darkslategray3")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+qq_hes6 <- gg_qq_empirical((hes6_18ss), imputed_18ss_hes6, "hes6", "brown1")
+qq_hes6 <- qq_hes6  + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
+qq_hes6
+ggsave("./results/qqplots/qq_hes6.png", qq_hes6)
 
-qq <- gg_qq_empirical((sp5l_18ss)$sp5l, as.numeric((imputed_18ss)$Sp5l), "sp5l", "darkorange1")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+qq_cdh6 <- gg_qq_empirical((cdh6_18ss), imputed_18ss_cdh6, "cdh6", "darkolivegreen3")
+qq_cdh6 <- qq_cdh6 + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
+qq_cdh6
+ggsave("./results/qqplots/qq_cdh6.png", qq_cdh6)
 
-qq <- gg_qq_empirical((znf703_18ss)$znf703, as.numeric((imputed_18ss)$Znf703), "znf703", "deeppink1")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+qq_wnt8a <- gg_qq_empirical((wnt8a_18ss), imputed_18ss_wnt8a, "wnt8a", "darkslategray3")
+qq_wnt8a <- qq_wnt8a + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
+qq_wnt8a
+ggsave("./results/qqplots/qq_wnt8a.png", qq_wnt8a)
 
-qq <- gg_qq_empirical((depdc7a_18ss)$depdc7a, as.numeric((imputed_18ss)$Depdc7a), "depdc7a", "blueviolet")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
 
-qq <- gg_qq_empirical((tagln3b_18ss)$tagln3b, as.numeric((imputed_18ss)$Tagln3b), "tagln3b", "coral")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+qq_sp5l <- gg_qq_empirical((sp5l_18ss), imputed_18ss_sp5l, "sp5l", "darkorange1")
+qq_sp5l <- qq_sp5l + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
+qq_sp5l
+ggsave("./results/qqplots/qq_sp5l.png", qq_sp5l)
 
-qq <- gg_qq_empirical((id3_18ss)$id3, as.numeric((imputed_18ss)$Id3), "id3", "deepskyblue3")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
 
-qq <- gg_qq_empirical((thbs2_18ss)$thbs2, as.numeric((imputed_18ss)$Thbs2), "thbs2", "deepskyblue")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
+qq_znf703 <- gg_qq_empirical((znf703_18ss), imputed_18ss_znf703, "znf703", "deeppink1")
+qq_znf703 <- qq_znf703 + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
+qq_znf703
+ggsave("./results/qqplots/qq_znf703.png", qq_znf703)
 
-sum((imputed_18ss)$Thbs2 > 7.5)
 
-quantile(imputed_18ss$Thbs2, quantile_val )
-quantile(thbs2_18ss$thbs2, quantile_val )
+qq_depdc7a <- gg_qq_empirical((depdc7a_18ss), imputed_18ss_depdc7a, "depdc7a", "blueviolet")
+qq_depdc7a <- qq_depdc7a + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
 
-(thbs2_18ss)$thbs2
+ggsave("./results/qqplots/qq_depdc7a.png", qq_depdc7a)
+
+
+qq_tagln3b <- gg_qq_empirical((tagln3b_18ss), imputed_18ss_tagln3b, "tagln3b", "coral")
+qq_tagln3b <- qq_tagln3b + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
+
+ggsave("./results/qqplots/qq_tagln3b.png", qq_tagln3b)
+
+
+qq_id3 <- gg_qq_empirical((id3_18ss), imputed_18ss_id3, "id3", "deepskyblue3")
+qq_id3 <- qq_id3 + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
+qq_id3
+ggsave("./results/qqplots/qq_id3.png", qq_id3)
+
+
+qq_thbs2 <- gg_qq_empirical((thbs2_18ss), imputed_18ss_thbs2, "thbs2", "deepskyblue")
+qq_thbs2 <- qq_thbs2 + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
+qq_thbs2
+ggsave("./results/qqplots/qq_thbs2.png", qq_thbs2)
+
 
 ```
 
-```{r}
-qq <- gg_qq_empirical((sox2_18ss)$sox2, as.numeric((imputed_18ss)$Sox2), "sox2", "chartreuse3")
-qq + theme_bw(base_family = "Trebuchet MS", base_size = 20) + coord_equal()
-
-```
 
 
