@@ -14,6 +14,7 @@ showtext_auto()
 font_add("Trebuchet MS", "trebuc.ttf")
 library(RColorBrewer)
 library(ggpubr)
+library(gridExtra)
 
 ```
 
@@ -290,6 +291,137 @@ qq_thbs2 <- qq_thbs2 + theme_bw(base_family = base_family, base_size = base_size
 qq_thbs2
 ggsave("./results/qqplots/qq_thbs2.png", qq_thbs2)
 
+
+```
+Comparing joint distributions of 2 genes:
+- Sox2 and tbxta - stt, sample2
+- Znf703 and Cdh6
+- Sp5l and Cdh6
+
+
+```{r Creating dataframes}
+
+st_original_df <- stt_posterior %>%
+  filter(sample_no == 2)
+head(st_original_df)
+st_original <- data.frame(sox2 = st_original_df$sox2, tbxta = st_original_df$tbxta, data = "Original")
+st_imputed <- data.frame(sox2 = imputed_18ss$Sox2, tbxta = imputed_18ss$Tbxta, data = "Imputed")
+st_merge <- rbind(st_original, st_imputed)
+
+zc_original_df <- stzc_posterior %>%
+  filter(sample_no == 4)
+head(zc_original_df)
+zc_original <- data.frame(Znf703 = zc_original_df$znf703, Cdh6 = zc_original_df$cdh6, data = "Original")
+zc_imputed <- data.frame(Znf703 = imputed_18ss$Znf703, Cdh6 = imputed_18ss$Cdh6, data = "Imputed")
+zc_merge <- rbind(zc_original, zc_imputed)
+
+wd_original_df <- stwd_posterior %>%
+  filter(sample_no == 1)
+head(wd_original_df)
+wd_original <- data.frame(Wnt8a = wd_original_df$wnt8a, Depdc7a = wd_original_df$depdc7a, data = "Original")
+wd_imputed <- data.frame(Wnt8a = imputed_18ss$Wnt8a, Depdc7a = imputed_18ss$Depdc7a, data = "Imputed")
+wd_merge <- rbind(wd_original, wd_imputed)
+
+
+```
+
+```{r Sox2 Tbxta ggplots}
+
+p1 <- ggplot(data = st_merge, aes(x = sox2, y = tbxta, color = data))+
+  geom_point(alpha = 0.15)+ 
+  theme_bw(base_family = base_family)+
+  theme(legend.title = element_blank(), legend.position =  c(0.85,0.85), legend.text = element_text(size = 10),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  labs(x = "Sox2", y = "Tbxta")
+  
+  
+p2 <- ggplot(data = st_merge, aes(x=sox2, colour = factor(data), fill = factor(data)))+
+  geom_density(alpha = 0.25) + 
+  scale_x_continuous(breaks=NULL,expand=c(0.02,0)) +
+  scale_y_continuous(breaks=NULL,expand=c(0.02,0)) + 
+  theme_bw(base_family = base_family) +
+  theme(legend.position = 'none', panel.border = element_blank())+
+  labs(x = "", y = "")
+
+p3 <- ggplot(data = st_merge, aes(x=tbxta, colour = factor(data), fill = factor(data)))+
+  geom_density(alpha = 0.25) + 
+  coord_flip()+
+  scale_x_continuous(breaks=NULL,expand=c(0.02,0)) +
+  scale_y_continuous(breaks=NULL,expand=c(0.02,0))+ 
+  theme_bw(base_family = base_family)+
+  theme(legend.position = 'none', panel.border = element_blank())+
+  labs(x = "", y = "")
+
+grid.arrange(arrangeGrob(p2,ncol=2,widths=c(3,1)),
+             arrangeGrob(p1,p3,ncol=2,widths=c(3,1.25)),
+             heights=c(1,3))
+
+```
+
+
+```{r Znf703 Cdh6 ggplots}
+
+p1 <- ggplot(data = zc_merge, aes(x = Znf703, y = Cdh6, color = data))+
+  geom_point(alpha = 0.15)+ 
+  theme_bw(base_family = base_family)+
+  theme(legend.title = element_blank(), legend.position =  c(0.85,0.85), legend.text = element_text(size = 10),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  labs(x = "Znf703", y = "Cdh6")
+  
+  
+p2 <- ggplot(data = zc_merge, aes(x=Znf703, colour = factor(data), fill = factor(data)))+
+  geom_density(alpha = 0.25) + 
+  scale_x_continuous(breaks=NULL,expand=c(0.02,0)) +
+  scale_y_continuous(breaks=NULL,expand=c(0.02,0)) + 
+  theme_bw(base_family = base_family) +
+  theme(legend.position = 'none', panel.border = element_blank())+
+  labs(x = "", y = "")
+
+p3 <- ggplot(data = zc_merge, aes(x=Cdh6, colour = factor(data), fill = factor(data)))+
+  geom_density(alpha = 0.25) + 
+  coord_flip()+
+  scale_x_continuous(breaks=NULL,expand=c(0.02,0)) +
+  scale_y_continuous(breaks=NULL,expand=c(0.02,0))+ 
+  theme_bw(base_family = base_family)+
+  theme(legend.position = 'none', panel.border = element_blank())+
+  labs(x = "", y = "")
+
+grid.arrange(arrangeGrob(p2,ncol=2,widths=c(3,1)),
+             arrangeGrob(p1,p3,ncol=2,widths=c(3,1.25)),
+             heights=c(1,3))
+
+```
+
+```{r Wnt8a Depdc7a ggplots}
+
+p1 <- ggplot(data = wd_merge, aes(x = Wnt8a, y = Depdc7a, color = data))+
+  geom_point(alpha = 0.15)+ 
+  theme_bw(base_family = base_family)+
+  theme(legend.title = element_blank(), legend.position =  c(0.85,0.85), legend.text = element_text(size = 10),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  labs(x = "Wnt8a", y = "Depdc7a")
+  
+  
+p2 <- ggplot(data = wd_merge, aes(x=Wnt8a, colour = factor(data), fill = factor(data)))+
+  geom_density(alpha = 0.25) + 
+  scale_x_continuous(breaks=NULL,expand=c(0.02,0)) +
+  scale_y_continuous(breaks=NULL,expand=c(0.02,0)) + 
+  theme_bw(base_family = base_family) +
+  theme(legend.position = 'none', panel.border = element_blank())+
+  labs(x = "", y = "")
+
+p3 <- ggplot(data = wd_merge, aes(x=Depdc7a, colour = factor(data), fill = factor(data)))+
+  geom_density(alpha = 0.25) + 
+  coord_flip()+
+  scale_x_continuous(breaks=NULL,expand=c(0.02,0)) +
+  scale_y_continuous(breaks=NULL,expand=c(0.02,0))+ 
+  theme_bw(base_family = base_family)+
+  theme(legend.position = 'none', panel.border = element_blank())+
+  labs(x = "", y = "")
+
+grid.arrange(arrangeGrob(p2,ncol=2,widths=c(3,1)),
+             arrangeGrob(p1,p3,ncol=2,widths=c(3,1.25)),
+             heights=c(1,3))
 
 ```
 
