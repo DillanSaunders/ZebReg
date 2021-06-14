@@ -29,8 +29,10 @@ gg_qq_empirical <- function(original , imputed , gene, color, quantiles = seq(0,
     labs(x = paste(gene, "(Original)"),
          y= paste(gene, "(Imputed)"))
 }
+
+
 base_family = "Trebuchet MS"
-base_size = 40
+base_size = 60
 ```
 
 ```{r importing combined csv}
@@ -38,7 +40,7 @@ imputed_18ss <- read.csv("./datasets/merged_csv/18ss_combined.csv")
 
 stt_posterior <- read.csv("./datasets/merged_csv/stt_posterior.csv")
 colnames(stt_posterior)[1] <- "sample_no"
-
+stt_posterior
 sthc_posterior <- read.csv("./datasets/merged_csv/sthc_posterior.csv")
 colnames(sthc_posterior)[1] <- "sample_no"
 
@@ -222,7 +224,7 @@ imputed_18ss_id3<- imputed_18ss %>%
 ```
 
 ```{r qqplot}
-
+base_size = 30
 qq_tbxta <- gg_qq_empirical((tbxta_18ss), imputed_18ss_tbxta, "tbxta", "brown3")
 qq_tbxta <- qq_tbxta + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
 qq_tbxta
@@ -270,13 +272,13 @@ ggsave("./results/qqplots/qq_znf703.png", qq_znf703)
 
 qq_depdc7a <- gg_qq_empirical((depdc7a_18ss), imputed_18ss_depdc7a, "depdc7a", "blueviolet")
 qq_depdc7a <- qq_depdc7a + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
-
+qq_depdc7a
 ggsave("./results/qqplots/qq_depdc7a.png", qq_depdc7a)
 
 
 qq_tagln3b <- gg_qq_empirical((tagln3b_18ss), imputed_18ss_tagln3b, "tagln3b", "coral")
 qq_tagln3b <- qq_tagln3b + theme_bw(base_family = base_family, base_size = base_size) + coord_equal()
-
+qq_tagln3b
 ggsave("./results/qqplots/qq_tagln3b.png", qq_tagln3b)
 
 
