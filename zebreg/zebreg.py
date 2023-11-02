@@ -10,6 +10,10 @@ import copy
 import matplotlib.pyplot as plt
 import tifffile.tifffile as tiff
 
+## RegistrationObj now takes a list of point arrays, each corresponding to a sample, and their corresponding
+## intensities of at least one parameter. You must specify the sample to be used as the target. Then all
+## samples in points list will be registered to the target including the target points themselves.
+## The transformation result and the transformed points are saved within the class itself
 
 class Registration_Obj():
     
